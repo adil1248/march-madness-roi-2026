@@ -96,4 +96,17 @@ Created for March Madness 2026. All 68 tournament teams ranked by actual wage im
 
 ---
 
+
+## 📋 Update Log
+
+### v1.1 — March 19, 2026
+- Added enhanced data visualizations (bar charts, color-coded impact indicators)
+- Cleaned up UX: improved layout, typography, and mobile responsiveness
+- Better visual hierarchy for the rankings table
+- Added tooltips and clearer labeling throughout
+
+### v1.0 — March 19, 2026
+- Initial release: all 68 March Madness 2026 teams ranked by COL-adjusted, dropout-penalized wage impact
+- Interactive filtering by conference, draw type, and ROI tier
+- Full methodology panel and glossary
 **Methodology details, sources, and assumptions are fully documented in the interactive glossary and methodology panels on the live site.**
