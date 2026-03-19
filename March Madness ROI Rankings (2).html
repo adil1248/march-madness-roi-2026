@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The March to Impact — Which Tournament Teams Actually Move the Wage Needle?</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#080818,#151535 50%,#0a1525);color:#dde0f0;min-height:100vh;overflow-x:hidden}
+/* Header */
+.hdr{background:linear-gradient(180deg,rgba(255,140,0,.1),transparent);border-bottom:1px solid rgba(255,140,0,.12);padding:22px 14px 16px;text-align:center}
+.ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,48px);letter-spacing:2px;line-height:1;background:linear-gradient(90deg,#FFD700,#FF8C00,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-family:'Bebas Neue',sans-serif;font-size:clamp(12px,2vw,18px);letter-spacing:5px;color:#6870a0;margin-bottom:8px}
+.dsc{font-size:11px;color:#5a6280;max-width:720px;margin:0 auto;line-height:1.55}
+.dsc em{color:#F44336}.dsc strong{color:#FFD700}
+/* Card rows */
+.card-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:1020px;margin:0 auto;padding:6px 10px}
+.crd{flex:1 1 200px;border-radius:10px;padding:14px 12px;text-align:center}
+.crd-logo{width:32px;height:32px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.08);display:block;margin:4px auto}
+.crd-l{font-size:7.5px;letter-spacing:2.5px;font-weight:700;margin-bottom:5px}
+.crd-big{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1.1}
+.crd-s{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;color:#dde0f0;margin-top:2px}
+.crd-n{font-size:9px;color:#7088a0;margin-top:4px;line-height:1.4}
+/* Bad card (merged) */
+.crd-bad{flex:1 1 100%;max-width:600px;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:16px;text-align:left}
+.crd-bad .crd-logo{margin:0;flex-shrink:0}
+.crd-bad-body{flex:1}
+.crd-bad .crd-l{margin-bottom:3px}
+.crd-bad .crd-s{font-size:18px}
+.crd-bad .crd-n{margin-top:3px}
+/* Tabs */
+.tabs{display:flex;justify-content:center;gap:0;margin:12px auto 0;max-width:500px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.tab{flex:1;padding:10px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1.5px;cursor:pointer;background:rgba(255,255,255,.02);color:#6878a8;transition:all .15s;border-right:1px solid rgba(255,255,255,.06)}
+.tab:last-child{border-right:none}
+.tab:hover{background:rgba(255,255,255,.04);color:#a0b0d0}
+.tab.on{background:rgba(255,215,0,.08);color:#e0c870}
+.tab-content{display:none;max-width:1220px;margin:0 auto;padding:10px}
+.tab-content.on{display:block}
+/* Info buttons */
+.ibtn-row{display:flex;gap:8px;justify-content:center;margin:8px 0 4px;flex-wrap:wrap}
+.ibtn{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#7080a0;padding:6px 16px;border-radius:14px;cursor:pointer;font-size:9px;letter-spacing:1px;font-family:inherit;transition:all .15s}
+.ibtn:hover{background:rgba(255,255,255,.06);color:#a0b0c8}
+.ibtn.active{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.25);color:#d0c090}
+.ibox{max-width:880px;margin:0 auto 10px;padding:0 10px;display:none}
+.ibox.show{display:block}
+.imin{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:14px;font-size:10px;color:#7080a0;line-height:1.8}
+.imin strong{color:#FFD700}.imin code{color:#4CAF50;font-size:9.5px}
+/* Filters */
+.flt{display:flex;gap:6px;padding:2px 10px 10px;justify-content:center;flex-wrap:wrap}
+.flt select{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#c0c0d8;padding:5px 10px;border-radius:5px;font-size:10px;font-family:inherit}
+/* Table */
+.tw{padding:0 4px 8px;overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0 2px;font-size:10.5px}
+th{padding:5px 3px;font-size:7.5px;letter-spacing:1px;color:#404868;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap;user-select:none;text-align:center;cursor:pointer}
+tr{cursor:pointer;transition:background .1s}
+tr:nth-child(4n+1),tr:nth-child(4n+2){background:rgba(255,255,255,.008)}
+tbody tr:hover{background:rgba(255,215,0,.02)!important}
+tr.ex{background:rgba(255,215,0,.04)!important}
+td{padding:6px 3px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px}
+td.sc{text-align:left;font-family:'DM Sans',sans-serif;font-weight:600;font-size:10.5px;white-space:nowrap}
+.lg{width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:5px;border-radius:2px;background:rgba(255,255,255,.05)}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.tt{padding:1px 4px;border-radius:3px;font-size:8.5px;font-weight:700}
+.bw{display:flex;align-items:center;gap:3px;justify-content:center;min-width:78px}
+.bb{width:36px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;position:relative;overflow:hidden;flex-shrink:0}
+.bf{position:absolute;height:100%;border-radius:2px}
+.dtr td{padding:0 3px 6px}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:3px;padding:8px;border-radius:5px;background:rgba(0,0,0,.2);font-size:8.5px}
+.dg .l{color:#404868;margin-bottom:1px}.dg .v{font-weight:700;font-family:'JetBrains Mono',monospace;color:#9098b8}
+.dg .v.hi{color:#4CAF50}
+.ds{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;padding:6px 8px 0;font-size:9px;color:#6070a0}
+.ds span{color:#505878}.ds b{color:#b0b8d0}
+.dv{margin-top:5px;padding:0 8px;color:#5a6890;font-size:9.5px;line-height:1.5}
+/* Visual panels */
+.vpanel{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:20px;margin-bottom:16px}
+.vp-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;margin-bottom:3px}
+.vp-sub{font-size:10.5px;color:#6878a0;margin-bottom:14px;line-height:1.5}
+/* FIXED horizontal bars: label OUTSIDE bar so bar width = data */
+.hbar{display:flex;align-items:center;gap:0;margin:6px 0;font-size:11px;height:26px}
+.hbar-logo{width:22px;height:22px;object-fit:contain;border-radius:2px;background:rgba(255,255,255,.05);flex-shrink:0;margin-right:6px}
+.hbar-name{width:105px;flex-shrink:0;font-weight:600;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px}
+.hbar-track{flex:1;height:18px;background:rgba(255,255,255,.03);border-radius:3px;position:relative;overflow:hidden}
+.hbar-fill{height:100%;border-radius:3px;transition:width .4s}
+.hbar-val{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+/* when bar is too small, put label outside */
+.hbar-val.outside{position:static;transform:none;margin-left:8px;text-shadow:none;flex-shrink:0}
+.hbar-meta{font-size:8px;color:#5060a0;margin-left:8px;flex-shrink:0;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.vdiv{width:100%;height:1px;background:rgba(255,255,255,.05);margin:16px 0}
+/* Twin compare */
+.twin{display:flex;gap:0;margin:12px 0}
+.twin-side{flex:1;padding:16px;position:relative}
+.twin-side.good{background:rgba(76,175,80,.05);border-radius:10px 0 0 10px;border:1px solid rgba(76,175,80,.15)}
+.twin-side.bad{background:rgba(244,67,54,.05);border-radius:0 10px 10px 0;border:1px solid rgba(244,67,54,.15)}
+.twin-vs{position:absolute;right:-16px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:#151535;border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:12px;color:#8890b0;z-index:1}
+.twin-school{font-family:'Bebas Neue',sans-serif;font-size:20px;display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.twin-logo{width:26px;height:26px;object-fit:contain;border-radius:3px;background:rgba(255,255,255,.06)}
+.twin-stats{font-size:10.5px;line-height:1.9;color:#8898b8}
+.twin-stats b{color:#dde0f0;font-family:'JetBrains Mono',monospace;font-size:11px}
+.twin-stats .g{color:#4CAF50}.twin-stats .r{color:#F44336}
+.twin-label{font-size:8px;letter-spacing:2px;font-weight:700;margin-bottom:6px}
+.vnote{font-size:9px;color:#4a5878;text-align:center;margin-top:8px;line-height:1.5}
+.chart-box{position:relative;height:380px;margin:6px 0}
+.ft{text-align:center;padding:12px 10px 22px;font-size:8px;color:#2a3250;border-top:1px solid rgba(255,255,255,.02);line-height:1.7}
+.g{color:#4CAF50}.b{color:#64B5F6}.d{color:#a0a8c0}.w{color:#FF9800}.n{color:#F44336}.u{color:#5a6280}
+@media(max-width:700px){.lg{width:16px;height:16px}td{padding:4px 2px;font-size:8.5px}td.sc{font-size:9.5px}th{font-size:7px}.crd{flex:1 1 140px;padding:10px 8px}.crd-logo{width:26px;height:26px}.crd-big{font-size:22px}.twin{flex-direction:column}.twin-side{border-radius:10px!important}.twin-vs{right:50%;top:auto;bottom:-16px;transform:translateX(50%)}.twin-side.good{margin-bottom:10px}.chart-box{height:280px}.hbar-meta{display:none}.crd-bad{flex-direction:column;text-align:center}.crd-bad .crd-logo{margin:0 auto}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+<div class="ttl">THE MARCH TO IMPACT</div>
+<div class="sub">WHICH MARCH MADNESS TEAMS ACTUALLY MOVE THE WAGE NEEDLE?</div>
+<div class="dsc">Forget seeds &mdash; these are the 68 tournament teams ranked by how much they <strong>actually raise graduates' earnings</strong> above what a high school diploma would have gotten them, adjusted for <strong>regional cost of living</strong>, <strong>graduation rates</strong>, and <strong>school accessibility</strong>. Spoiler: <strong id="nc"></strong> of 68 teams leave students <em>worse off</em> than if they'd never enrolled.</div>
+</div>
+
+<!-- POSITIVE ROW: 3 green-toned cards -->
+<div class="card-row" id="goodCards"></div>
+<!-- NEGATIVE ROW: 1 merged red card -->
+<div class="card-row" id="badCard"></div>
+
+<!-- TAB BAR -->
+<div class="tabs">
+<div class="tab on" onclick="switchTab('vis')">VISUALS</div>
+<div class="tab" onclick="switchTab('tbl')">FULL TABLE</div>
+</div>
+
+<div class="ibtn-row">
+<button class="ibtn" id="glossBtn" onclick="toggleInfo('gloss')">&#9660; HOW TO READ THIS</button>
+<button class="ibtn" id="methBtn" onclick="toggleInfo('meth')">&#9660; METHODOLOGY</button>
+</div>
+<div class="ibox" id="gloss"><div class="imin" style="font-size:9.5px;line-height:1.65">
+<strong style="color:#4CAF50">IMPACT</strong> &mdash; Headline score: earning power &times; grad rate &times; accessibility &times; scale. Higher = lifts more people more.<br>
+<strong style="color:#42A5F5">ADJ ROI</strong> &mdash; Lifetime return vs. not attending. Dropouts get zero benefit but still paid tuition.<br>
+<strong style="color:#64B5F6">COL GAIN</strong> &mdash; Annual raise over a HS worker <em>in the same region</em>, in real purchasing power.<br>
+<strong style="color:#a0a8c0">GRAD%</strong> &mdash; 6-yr graduation rate. Under 50% = most leave with debt, no credential.<br>
+<strong style="color:#a0a8c0">ACC%</strong> &mdash; Acceptance rate. Higher = more accessible. &nbsp; <strong style="color:#a0a8c0">SIZE</strong> &mdash; Enrollment (K).<br>
+<strong style="color:#a0a8c0">RPP</strong> &mdash; Regional Price Parity (100=nat'l avg). &lt;100 = cheaper. &gt;100 = pricier.<br>
+<strong style="color:#a0a8c0">DRAW</strong> &mdash; <b>N</b>=National <b>B</b>=Broad <b>R</b>=Regional. &nbsp; <strong style="color:#a0a8c0">COST</strong> &mdash; Net price after aid.<br>
+<strong style="color:#a0a8c0">T</strong> &mdash; <b style="color:#4CAF50">S</b>=Elite <b style="color:#66BB6A">A</b>=Strong <b style="color:#42A5F5">B</b>=Solid <b style="color:#FF9800">C</b>=Even <b style="color:#EF5350">D</b>=Neg <b style="color:#AD1457">F</b>=Deep Neg<br>
+<span style="color:#4CAF50">&#9632;</span> Green=best <span style="color:#64B5F6">&#9632;</span> Blue=good <span style="color:#a0a8c0">&#9632;</span> Gray=avg <span style="color:#FF9800">&#9632;</span> Orange=caution <span style="color:#F44336">&#9632;</span> Red=bad
+</div></div>
+<div class="ibox" id="meth"><div class="imin">
+<strong>1.</strong> HS baseline: $50K/yr (BLS 2025) scaled by state RPP. Iowa: $43.9K. NY: $53.1K.<br>
+<strong>2.</strong> Draw: National (&le;25% &rarr; nat'l baseline), Broad (26-60% &rarr; blend), Regional (&gt;60% &rarr; state).<br>
+<strong>3.</strong> <code>Real Earnings = Nominal &times; (100/RPP)</code>. $58K in Iowa = $66K purchasing power.<br>
+<strong>4.</strong> <code>Annual Gain = Real Earnings &minus; Blended Baseline</code>. Can be <span style="color:#F44336">negative</span>.<br>
+<strong>5.</strong> <code>AdjROI = GradRate&times;(Gain&times;40 &minus; Cost&times;4.5) + (1&minus;GradRate)&times;(&minus;Cost&times;2)</code><br>
+<strong>6.</strong> <code>Impact = AdjROI &times; (AccRate/50) &times; log&#8322;(Enroll/5K)</code><br>
+Sources: BEA RPPs 2024 &middot; Georgetown CEW 2025 &middot; College Scorecard &middot; BLS CPS Q1 2025 &middot; IPEDS &middot; CDS 2024-25
+</div></div>
+
+<!-- ═══════ VISUALS TAB ═══════ -->
+<div class="tab-content on" id="vis">
+<div class="vpanel">
+<div class="vp-title">BIGGEST ANNUAL WAGE BOOST OVER HIGH SCHOOL</div>
+<div class="vp-sub">How much more per year graduates earn vs. a HS-only worker in the same region, adjusted for cost of living.</div>
+<div id="topWageBars"></div>
+<div class="vdiv"></div>
+<div class="vp-title" style="color:#EF5350">BIGGEST ANNUAL WAGE LOSS vs. HIGH SCHOOL</div>
+<div class="vp-sub">These graduates earn <em>less</em> than HS-only workers in their region. The degree is a net financial loss.</div>
+<div id="botWageBars"></div>
+</div>
+
+<div class="vpanel">
+<div class="vp-title">SAME SIZE, OPPOSITE OUTCOMES</div>
+<div class="vp-sub">Both ~50K students, both ~50% acceptance rate. One produces +$32K/yr. The other: +$300/yr.</div>
+<div class="twin">
+<div class="twin-side good"><div class="twin-vs">VS</div>
+<div class="twin-label" style="color:#4CAF50">+$32,400/YR OVER HS</div>
+<div class="twin-school"><img class="twin-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png" alt="">Purdue</div>
+<div class="twin-stats">Lifetime ROI: <b class="g">+$1,031K</b><br>Grad: <b>84%</b> &middot; Accept: <b>53%</b> &middot; 50.9K students<br>Indiana (RPP 91) &middot; Net: <b>$14K/yr</b></div>
+</div>
+<div class="twin-side bad">
+<div class="twin-label" style="color:#F44336">+$300/YR OVER HS</div>
+<div class="twin-school"><img class="twin-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/58.png" alt="">South Florida</div>
+<div class="twin-stats">Lifetime ROI: <b class="r">-$25K</b><br>Grad: <b>62%</b> &middot; Accept: <b>46%</b> &middot; 49.8K students<br>Florida (RPP 102) &middot; Net: <b>$9K/yr</b></div>
+</div></div>
+<div class="vnote">84% grad rate + strong earnings in low-cost Indiana = massive premium. 62% grad rate in higher-cost Florida erases the degree value entirely.</div>
+</div>
+
+<div class="vpanel">
+<div class="vp-title">SAME 91% ACCEPTANCE &mdash; $670K APART</div>
+<div class="vp-sub">Both wide-open admissions, similar size. Cost of living swings the entire equation.</div>
+<div class="twin">
+<div class="twin-side good"><div class="twin-vs">VS</div>
+<div class="twin-label" style="color:#4CAF50">+$21,000/YR OVER HS</div>
+<div class="twin-school"><img class="twin-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/66.png" alt="">Iowa State</div>
+<div class="twin-stats">Lifetime ROI: <b class="g">+$596K</b><br>$57K nominal &rarr; <b>$64.9K</b> real (Iowa RPP 87.8)<br>Iowa HS baseline: <b>$43.9K</b><br>Grad: <b>76%</b> &middot; 30.7K students</div>
+</div>
+<div class="twin-side bad">
+<div class="twin-label" style="color:#F44336">-$1,000/YR vs HS</div>
+<div class="twin-school"><img class="twin-logo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/2670.png" alt="">VCU</div>
+<div class="twin-stats">Lifetime ROI: <b class="r">-$74K</b><br>$51K nominal &rarr; <b>$50K</b> real (VA RPP 102)<br>Virginia HS baseline: <b>$51K</b><br>Grad: <b>62%</b> &middot; 28.1K students</div>
+</div></div>
+<div class="vnote">Iowa's low cost of living converts a modest $57K salary into $64.9K of buying power, crushing the $43.9K local HS baseline. VCU's $51K in pricier Virginia barely matches.</div>
+</div>
+
+<div class="vpanel">
+<div class="vp-title">THE GRADUATION RATE CLIFF</div>
+<div class="vp-sub">Each bubble is a tournament team (size = enrollment). Below ~65% graduation rate, almost every school drops into negative territory.</div>
+<div class="chart-box"><canvas id="scatterChart"></canvas></div>
+</div>
+</div>
+
+<!-- ═══════ TABLE TAB ═══════ -->
+<div class="tab-content" id="tbl">
+<div class="flt">
+<select id="ft" onchange="render()"><option value="All">All Tiers</option></select>
+<select id="fr" onchange="render()"><option value="All">All Regions</option></select>
+<select id="sb" onchange="render()">
+<option value="impact">Sort: Impact</option><option value="adjROI">Sort: Adj ROI</option>
+<option value="colGain">Sort: COL Gain</option><option value="gradRate">Sort: Grad%</option>
+<option value="acceptRate">Sort: Accept%</option><option value="enroll">Sort: Size</option>
+<option value="netPrice">Sort: Cost (low first)</option><option value="seed">Sort: Seed</option>
+</select>
+</div>
+<div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+</div>
+
+<div class="ft">The March to Impact &mdash; 2026 NCAA Tournament ROI Analysis<br>BEA RPPs 2024 &middot; Georgetown CEW 2025 &middot; College Scorecard &middot; BLS CPS Q1 2025 &middot; IPEDS &middot; CDS 2024-25</div>
+
+<script>
+function fK(v){return v>=0?'+$'+v+'K':'-$'+Math.abs(v)+'K'}
+function fM(v){if(Math.abs(v)>=1000)return(v>=0?'+':'-')+'$'+(Math.abs(v)/1000).toFixed(1)+'M';return(v>=0?'+':'-')+'$'+Math.abs(v)+'K'}
+function clr(val,th){for(var i=0;i<th.length;i++){if(val>=th[i][0])return th[i][1]}return th[th.length-1][1]}
+function fDollar(v){return Math.round(Math.abs(v)*1000).toLocaleString()}
+
+var NAT_HS=50;
+var RPP={AL:87.9,AK:103.1,AZ:97.8,AR:86.9,CA:110.7,CO:105.2,CT:107.0,DE:101.3,DC:109.9,FL:102.1,GA:93.1,HI:110.0,ID:94.5,IL:98.3,IN:91.0,IA:87.8,KS:90.4,KY:89.4,LA:90.0,ME:99.5,MD:107.8,MA:108.5,MI:92.5,MN:97.6,MS:87.0,MO:89.6,MT:96.8,NE:90.7,NV:99.0,NH:105.8,NJ:108.8,NM:92.0,NY:106.2,NC:94.7,ND:93.2,OH:90.8,OK:87.8,OR:103.7,PA:98.3,RI:101.0,SC:92.7,SD:90.9,TN:91.3,TX:96.1,UT:99.5,VT:101.8,VA:102.0,WA:106.5,WV:88.2,WI:93.0,WY:95.5};
+var espnIds={"Duke":150,"Michigan":130,"Arizona":12,"Florida":57,"Houston":248,"Iowa State":66,"UConn":41,"Purdue":2509,"Michigan State":127,"Illinois":356,"Gonzaga":2250,"Virginia":258,"Nebraska":158,"Arkansas":8,"Alabama":333,"Kansas":2305,"Wisconsin":275,"Vanderbilt":238,"Texas Tech":2641,"St. John's":2599,"Louisville":97,"North Carolina":153,"BYU":252,"Tennessee":2633,"Saint Mary's":2608,"UCLA":26,"Kentucky":96,"Miami (Fla.)":2390,"Ohio State":194,"Georgia":61,"Villanova":222,"Clemson":228,"TCU":2628,"Saint Louis":139,"Utah State":328,"Iowa":2294,"Texas A&M":245,"Santa Clara":2541,"UCF":2116,"Missouri":142,"South Florida":58,"VCU":2670,"Texas":251,"SMU":2567,"Miami (Ohio)":193,"NC State":152,"High Point":2314,"McNeese":2377,"Akron":2006,"UNI":2460,"Troy":2653,"Hawai'i":62,"Hofstra":2275,"Cal Baptist":2856,"North Dakota St":2449,"Penn":219,"Kennesaw State":338,"Wright State":2750,"Idaho":70,"Tennessee State":2634,"Furman":231,"Queens":3101,"Siena":2561,"Howard":47,"Prairie View A&M":2504,"Lehigh":2329,"Long Island":2344,"UMBC":2378};
+function logoUrl(s){var id=espnIds[s];return id?'https://a.espncdn.com/i/teamlogos/ncaa/500/'+id+'.png':'';}
+var tierD={S:{bg:"#4CAF50",lb:"ELITE"},A:{bg:"#66BB6A",lb:"STRONG"},B:{bg:"#42A5F5",lb:"SOLID"},C:{bg:"#FF9800",lb:"BREAK EVEN"},D:{bg:"#EF5350",lb:"NEGATIVE"},F:{bg:"#AD1457",lb:"DEEP NEG"}};
+var regC={East:"#3b82f6",South:"#ef4444",West:"#f59e0b",Midwest:"#22c55e"};
+
+var raw=[["Duke",1,"East","NC",89,96,6,6.7,27],["Michigan",1,"South","MI",72,93,18,48.1,16],["Arizona",1,"West","AZ",65,86,87,49.5,13],["Florida",1,"Midwest","FL",63,90,23,55.2,10],["Houston",2,"South","TX",58,63,66,47,11],["Iowa State",2,"West","IA",57,76,91,30.7,11],["UConn",2,"Midwest","CT",71,88,56,32.7,18],["Purdue",2,"East","IN",73,84,53,50.9,14],["Michigan State",3,"East","MI",62,82,78,50.4,16],["Illinois",3,"South","IL",68,87,45,56.6,15],["Gonzaga",3,"West","WA",58,87,62,7.6,24],["Virginia",3,"Midwest","VA",74,95,19,26.9,17],["Nebraska",4,"East","NE",55,72,80,25.1,13],["Arkansas",4,"West","AR",49,68,73,30.9,12],["Alabama",4,"Midwest","AL",54,73,80,38.6,15],["Kansas",4,"Midwest","KS",56,70,88,27.6,15],["Wisconsin",5,"East","WI",65,89,49,49.1,13],["Vanderbilt",5,"East","TN",78,93,5,7.1,27],["Texas Tech",5,"Midwest","TX",54,62,73,40.3,13],["St. John's",5,"Midwest","NY",60,71,54,16.8,20],["Louisville",6,"East","KY",52,60,73,22.3,14],["North Carolina",6,"South","NC",66,91,17,32,13],["BYU",6,"West","UT",65,68,67,34.4,6],["Tennessee",6,"Midwest","TN",53,73,70,35.7,12],["Saint Mary's",7,"South","CA",62,78,71,3.6,28],["UCLA",7,"Midwest","CA",70,92,9,46.4,14],["Kentucky",7,"West","KY",52,69,90,30.5,15],["Miami (Fla.)",7,"West","FL",65,83,19,12.6,29],["Ohio State",8,"East","OH",64,87,53,61.2,16],["Georgia",8,"South","GA",58,88,43,40.8,13],["Villanova",8,"West","PA",75,91,23,10.9,30],["Clemson",8,"Midwest","SC",57,84,43,28.4,16],["TCU",9,"East","TX",59,80,38,12.1,26],["Saint Louis",9,"South","MO",56,76,57,12.3,25],["Utah State",9,"West","UT",50,44,92,27.6,10],["Iowa",9,"Midwest","IA",58,74,84,31.4,12],["Texas A&M",10,"South","TX",63,83,63,74.8,14],["Santa Clara",10,"West","CA",75,89,49,9,30],["UCF",10,"Midwest","FL",54,74,41,72,11],["Missouri",10,"West","MO",53,72,82,31.1,13],["South Florida",11,"East","FL",52,62,46,49.8,9],["VCU",11,"South","VA",51,62,91,28.1,14],["Texas",11,"Midwest","TX",66,88,31,52.4,14],["SMU",11,"West","TX",67,82,46,12.5,29],["Miami (Ohio)",11,"West","OH",58,82,86,17.2,17],["NC State",11,"Midwest","NC",62,82,47,37.2,13],["High Point",12,"East","NC",43,63,78,6,22],["McNeese",12,"East","LA",38,38,77,6.8,8],["Akron",12,"Midwest","OH",47,47,97,14.8,12],["UNI",12,"Midwest","IA",52,70,89,9.6,12],["Troy",13,"East","AL",40,42,82,14.5,11],["Hawai'i",13,"West","HI",48,55,83,17.5,10],["Hofstra",13,"Midwest","NY",57,67,72,10.6,25],["Cal Baptist",13,"Midwest","CA",42,55,77,11.6,19],["North Dakota St",14,"East","ND",50,61,92,13.1,12],["Penn",14,"South","PA",88,96,5,10.6,23],["Kennesaw State",14,"West","GA",45,42,83,43,12],["Wright State",14,"Midwest","OH",45,41,96,10.4,10],["Idaho",15,"South","ID",45,44,79,11.5,10],["Tennessee State",15,"West","TN",35,28,62,7.2,11],["Furman",15,"Midwest","SC",53,82,65,2.9,24],["Queens",15,"East","NC",42,55,72,3.1,18],["Siena",16,"East","NY",50,70,78,3.4,22],["Howard",16,"South","DC",48,60,53,12.2,18],["Prairie View A&M",16,"South","TX",36,30,68,8.7,10],["Lehigh",16,"South","PA",70,87,32,7.3,28],["Long Island",16,"West","NY",40,38,88,4.3,19],["UMBC",16,"South","MD",55,63,79,13.6,13]];
+
+function build(r){
+  var s=r[0],seed=r[1],reg=r[2],st=r[3],me=r[4],gr=r[5],ac=r[6],en=r[7],np=r[8];
+  var rpp=RPP[st]||100,stHS=Math.round(NAT_HS*(rpp/100)*10)/10;
+  var draw,bn;if(ac<=25){draw="National";bn=1}else if(ac<=60){draw="Broad";bn=.5}else{draw="Regional";bn=0}
+  var base=Math.round((bn*NAT_HS+(1-bn)*stHS)*10)/10;
+  var real=Math.round(me*(100/rpp)*10)/10,cg=Math.round((real-base)*10)/10,c40=Math.round(cg*40);
+  var adj=Math.round((gr/100)*(c40-np*4.5)+(1-gr/100)*(0-np*2));
+  var tier;if(adj>=700)tier="S";else if(adj>=400)tier="A";else if(adj>=150)tier="B";else if(adj>=0)tier="C";else if(adj>=-100)tier="D";else tier="F";
+  var imp;if(adj<=0)imp=Math.round(adj);else{var am=Math.min(ac/50,2),sm=Math.max(Math.log2(en/5),.5);imp=Math.round(adj*am*sm/10)}
+  var wl=Math.round(cg*en*(gr/100)*10)/10;
+  return{school:s,seed:seed,region:reg,st:st,rpp:rpp,medEarn:me,realEarn:real,gradRate:gr,acceptRate:ac,enroll:en,netPrice:np,stateHS:stHS,baseline:base,draw:draw,colGain:cg,cum40:c40,adjROI:adj,tier:tier,impact:imp,logo:logoUrl(s),wageLift:wl};
+}
+var T=raw.map(build);
+function rankBy(k,a){var s=T.slice().sort(function(x,y){return a?x[k]-y[k]:y[k]-x[k]});var r={};s.forEach(function(t,i){r[t.school]=i+1});return r}
+var RK={impact:rankBy("impact"),adjROI:rankBy("adjROI"),colGain:rankBy("colGain"),gradRate:rankBy("gradRate"),medEarn:rankBy("medEarn"),netPrice:rankBy("netPrice",true),acceptRate:rankBy("acceptRate"),enroll:rankBy("enroll")};
+document.getElementById("nc").textContent=T.filter(function(t){return t.adjROI<0}).length;
+var ftSel=document.getElementById("ft");Object.keys(tierD).forEach(function(t){var o=document.createElement("option");o.value=t;o.textContent="Tier "+t;ftSel.appendChild(o)});
+var frSel=document.getElementById("fr");["East","South","West","Midwest"].forEach(function(r){var o=document.createElement("option");o.value=r;o.textContent=r;frSel.appendChild(o)});
+
+// ── Cards ──
+var topI=T.reduce(function(b,t){return t.impact>b.impact?t:b},T[0]);
+var topR=T.reduce(function(b,t){return t.adjROI>b.adjROI?t:b},T[0]);
+var topL=T.reduce(function(b,t){return t.wageLift>b.wageLift?t:b},T[0]);
+var botL=T.reduce(function(b,t){return t.wageLift<b.wageLift?t:b},T[0]);
+function fLift(v){var a=Math.abs(v);return a>=1000?'$'+(a/1000).toFixed(1)+'B':'$'+Math.round(a)+'M'}
+
+// Row 1: 3 positive green cards
+var gc=document.getElementById("goodCards");
+[{l:"#1 IMPACT SCORE",t:topI,big:topI.impact,n:topI.acceptRate+'% accept, '+topI.enroll.toFixed(0)+'K students, '+topI.gradRate+'% grad',c:"#4CAF50"},
+{l:"#1 LIFETIME ROI",t:topR,big:fK(topR.colGain)+'/yr',n:'$'+(topR.adjROI/1000).toFixed(1)+'M lifetime gain, '+topR.gradRate+'% grad rate',c:"#66BB6A"},
+{l:"MOST WAGES LIFTED",t:topL,big:'+'+fLift(topL.wageLift)+'/yr',n:'Across '+topL.enroll.toFixed(0)+'K students at '+topL.gradRate+'% grad rate',c:"#42A5F5"}
+].forEach(function(c){
+  gc.innerHTML+='<div class="crd" style="background:linear-gradient(135deg,'+c.c+'0F,'+c.c+'05);border:1px solid '+c.c+'30"><div class="crd-l" style="color:'+c.c+'">'+c.l+'</div><img class="crd-logo" src="'+c.t.logo+'" onerror="this.style.display=\'none\'" alt=""><div class="crd-s">'+c.t.school+'</div><div class="crd-big" style="color:'+c.c+'">'+c.big+'</div><div class="crd-n">'+c.n+'</div></div>';
+});
+
+// Row 2: 1 merged red card
+var bc=document.getElementById("badCard");
+bc.innerHTML='<div class="crd-bad" style="background:linear-gradient(135deg,#EF535010,#EF535005);border:1px solid #EF535030"><img class="crd-logo" src="'+botL.logo+'" onerror="this.style.display=\'none\'" alt=""><div class="crd-bad-body"><div class="crd-l" style="color:#EF5350">WORST PER-STUDENT ROI &amp; BIGGEST TOTAL WAGE DRAIN</div><div class="crd-s" style="color:#EF5350">'+botL.school+'</div><div class="crd-n"><b style="color:#EF5350">'+fK(botL.colGain)+'/yr</b> vs HS per grad &nbsp;&middot;&nbsp; <b style="color:#EF5350">-'+fLift(botL.wageLift)+'/yr</b> total wages drained across '+botL.enroll.toFixed(0)+'K students<br>'+botL.gradRate+'% grad rate &middot; '+botL.st+' (RPP '+botL.rpp+') &middot; $'+botL.netPrice+'K/yr net price &middot; #'+botL.seed+' seed</div></div></div>';
+
+// ── Tab switching ──
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
+  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('on')});
+  document.getElementById(id).classList.add('on');
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){if((id==='vis'&&t.textContent==='VISUALS')||(id==='tbl'&&t.textContent==='FULL TABLE'))t.classList.add('on')});
+  if(id==='tbl')render();
+}
+function toggleInfo(id){
+  var panel=document.getElementById(id),btn=document.getElementById(id+'Btn'),isOpen=panel.classList.contains('show');
+  ['gloss','meth'].forEach(function(p){document.getElementById(p).classList.remove('show');var b=document.getElementById(p+'Btn');b.classList.remove('active');b.innerHTML=p==='gloss'?'&#9660; HOW TO READ THIS':'&#9660; METHODOLOGY'});
+  if(!isOpen){panel.classList.add('show');btn.classList.add('active');btn.innerHTML=id==='gloss'?'&#9650; HOW TO READ THIS':'&#9650; METHODOLOGY'}
+}
+
+// ── FIXED Wage bars: label OUTSIDE bar when bar < 35% ──
+var sortedByCG=T.slice().sort(function(a,b){return b.colGain-a.colGain});
+var top5=sortedByCG.slice(0,5);
+var bot5=sortedByCG.slice(-5).reverse();
+function drawWageBars(elId,list){
+  var maxAbs=Math.max.apply(null,list.map(function(t){return Math.abs(t.colGain)}));
+  if(maxAbs===0)maxAbs=1;
+  var el=document.getElementById(elId),html='';
+  list.forEach(function(t){
+    var pct=Math.round(Math.abs(t.colGain)/maxAbs*100);
+    var color=t.colGain>=0?'#4CAF50':'#EF5350';
+    var sign=t.colGain>=0?'+':'-';
+    var label=sign+'$'+fDollar(t.colGain)+'/yr';
+    var inside=pct>=35;
+    html+='<div class="hbar">'
+      +'<img class="hbar-logo" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="">'
+      +'<div class="hbar-name">'+t.school+'</div>'
+      +'<div class="hbar-track">'
+      +'<div class="hbar-fill" style="width:'+Math.max(pct,4)+'%;background:'+color+'"></div>'
+      +(inside?'<div class="hbar-val" style="color:#fff">'+label+'</div>':'')
+      +'</div>'
+      +(!inside?'<div class="hbar-val outside" style="color:'+color+'">'+label+'</div>':'')
+      +'<div class="hbar-meta">#'+t.seed+' &middot; '+t.gradRate+'% grad &middot; '+t.st+' ('+t.rpp+')</div>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+}
+drawWageBars('topWageBars',top5);
+drawWageBars('botWageBars',bot5);
+
+// ── Scatter chart ──
+new Chart(document.getElementById('scatterChart'),{
+  type:'bubble',
+  data:{datasets:[{
+    data:T.map(function(t){return{x:t.gradRate,y:t.colGain,r:Math.max(Math.sqrt(t.enroll)*1.1,3)}}),
+    backgroundColor:T.map(function(t){return t.colGain>=15?'rgba(76,175,80,.45)':t.colGain>=0?'rgba(66,165,245,.35)':'rgba(239,83,80,.45)'}),
+    borderColor:T.map(function(t){return t.colGain>=15?'#4CAF50':t.colGain>=0?'#42A5F5':'#EF5350'}),
+    borderWidth:1
+  }]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var t=T[ctx.dataIndex];return t.school+': '+(t.colGain>=0?'+':'')+t.colGain+'K/yr, Grad '+t.gradRate+'%, '+t.enroll.toFixed(0)+'K students'}}}},
+    scales:{
+      x:{title:{display:true,text:'GRADUATION RATE (%)',color:'#6878a0',font:{size:10}},grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#6878a0'},min:20,max:100},
+      y:{title:{display:true,text:'ANNUAL WAGE GAIN vs HS (COL-adjusted, $K/yr)',color:'#6878a0',font:{size:10}},grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#6878a0',callback:function(v){return(v>=0?'+':'')+v+'K'}}}
+    }
+  }
+});
+
+// ── Table ──
+var expanded=null;
+function render(){
+  var sk=document.getElementById("sb").value,ftt=document.getElementById("ft").value,frr=document.getElementById("fr").value;
+  var L=T.slice();
+  if(ftt!=="All")L=L.filter(function(t){return t.tier===ftt});
+  if(frr!=="All")L=L.filter(function(t){return t.region===frr});
+  L.sort(function(a,b){if(sk==="netPrice"||sk==="seed")return a[sk]-b[sk];if(sk==="school")return a.school.localeCompare(b.school);return b[sk]-a[sk]});
+  var mxA=Math.max.apply(null,T.map(function(t){return t.adjROI})),mnA=Math.min.apply(null,T.map(function(t){return t.adjROI})),rng=mxA-mnA||1,z0=((0-mnA)/rng)*100;
+  var h='<tr>';[["#"],["SCHOOL"],["SD"],["IMPACT"],["ADJ ROI"],["COL GAIN"],["GRAD%"],["ACC%"],["SIZE"],["RPP"],["DRAW"],["COST"],["T"]].forEach(function(c){h+='<th>'+c[0]+'</th>'});h+='</tr>';
+  document.getElementById("th").innerHTML=h;
+  var b='';
+  L.forEach(function(t,i){
+    var rk=RK.impact[t.school],tc=tierD[t.tier],rc=regC[t.region],isE=expanded===t.school;
+    var rkC=clr(69-rk,[[66,'g'],[58,'b'],[0,'u']]),impC=clr(t.impact,[[150,'g'],[50,'b'],[0,'d'],[-9999,'n']]),adjC=clr(t.adjROI,[[400,'g'],[150,'b'],[0,'d'],[-9999,'n']]),gC=clr(t.colGain,[[15,'g'],[5,'b'],[0,'w'],[-9999,'n']]),grC=clr(t.gradRate,[[85,'g'],[70,'b'],[50,'w'],[0,'n']]),acC=clr(t.acceptRate,[[70,'g'],[40,'d'],[0,'w']]),szC=clr(t.enroll,[[40,'g'],[20,'d'],[0,'u']]),cC=clr(100-t.netPrice,[[88,'g'],[80,'d'],[0,'w']]),rppC=clr(100-t.rpp,[[8,'g'],[0,'d'],[-99,'w']]),drawC=t.draw==='Regional'?'g':t.draw==='Broad'?'d':'w';
+    var pct=((t.adjROI-mnA)/rng)*100,isN=t.adjROI<0;
+    var bar=isN?'<div class="bf" style="left:'+pct+'%;width:'+(z0-pct)+'%;background:#EF5350"></div>':'<div class="bf" style="left:'+Math.max(z0,0)+'%;width:'+(pct-Math.max(z0,0))+'%;background:'+(t.adjROI>=400?'#4CAF50':'#42A5F5')+'"></div>';
+    var sn=t.school.replace(/'/g,"\\'");
+    b+='<tr class="'+(isE?'ex':'')+'" onclick="togRow(\''+sn+'\')">';
+    b+='<td class="'+rkC+'" style="font-weight:700">'+rk+'</td>';
+    b+='<td class="sc"><img class="lg" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt=""><span class="dot" style="background:'+rc+'"></span>'+t.school+'</td>';
+    b+='<td class="u">'+t.seed+'</td><td class="'+impC+'" style="font-weight:700">'+t.impact+'</td>';
+    b+='<td><div class="bw"><div class="bb">'+bar+'</div><span class="'+adjC+'" style="font-size:8.5px">'+fM(t.adjROI)+'</span></div></td>';
+    b+='<td class="'+gC+'" style="font-weight:600">'+(t.colGain>=0?'+':'')+'$'+t.colGain+'K</td>';
+    b+='<td class="'+grC+'">'+t.gradRate+'%</td><td class="'+acC+'">'+t.acceptRate+'%</td>';
+    b+='<td class="'+szC+'">'+t.enroll.toFixed(1)+'K</td><td class="'+rppC+'">'+t.rpp+'</td>';
+    b+='<td class="'+drawC+'" style="font-size:8px;font-family:DM Sans">'+t.draw.charAt(0)+'</td>';
+    b+='<td class="'+cC+'">$'+t.netPrice+'K</td>';
+    b+='<td><span class="tt" style="background:'+tc.bg+'20;color:'+tc.bg+'">'+t.tier+'</span></td></tr>';
+    if(isE){
+      b+='<tr class="dtr"><td colspan="13"><div class="dg">';
+      [{l:"IMPACT",k:"impact"},{l:"ADJ ROI",k:"adjROI"},{l:"COL GAIN",k:"colGain"},{l:"GRAD",k:"gradRate"},{l:"EARN",k:"medEarn"},{l:"COST",k:"netPrice"},{l:"ACCESS",k:"acceptRate"},{l:"SIZE",k:"enroll"}].forEach(function(x){var rv=RK[x.k][t.school];b+='<div><div class="l">'+x.l+' RANK</div><div class="v'+(rv<=5?' hi':'')+'\">#'+rv+'</div></div>'});
+      b+='</div><div class="ds"><div><span>Nominal: </span><b>$'+t.medEarn+'K/yr</b></div><div><span>COL-Adj: </span><b>$'+t.realEarn+'K/yr</b></div><div><span>State HS: </span><b>$'+t.stateHS+'K ('+t.st+')</b></div><div><span>Blended: </span><b>$'+t.baseline+'K</b></div><div><span>RPP: </span><b>'+t.rpp+' ('+(t.rpp<95?'low':t.rpp<=105?'avg':'high')+' cost)</b></div><div><span>40yr: </span><b class="'+(t.cum40>=0?'g':'n')+'">'+fM(t.cum40)+'</b></div></div>';
+      var vd='';
+      if(t.colGain<0)vd='<span style="color:#EF5350">&#9888;</span> NEGATIVE &mdash; Grads earn $'+Math.abs(t.colGain)+'K/yr LESS than '+(t.draw==='Regional'?'local':'blended')+' HS workers.'+(t.gradRate<50?' Only '+t.gradRate+'% graduate.':'');
+      else if(t.colGain<=3)vd='<span style="color:#FF9800">&#9888;</span> MARGINAL &mdash; Barely +$'+t.colGain+'K/yr over baseline.'+(t.gradRate<70?' '+t.gradRate+'% grad rate is risky.':'');
+      else if(t.colGain<=12)vd='<span style="color:#42A5F5">&#10003;</span> DECENT &mdash; +$'+t.colGain+'K/yr over '+(t.draw==='Regional'?t.st+' baseline':'national baseline')+'.'+(t.rpp<93?' Low COL helps.':'');
+      else vd='<span style="color:#4CAF50">&#10003;</span> STRONG &mdash; +$'+t.colGain+'K/yr real gain.'+(t.gradRate>=85?' '+t.gradRate+'% grad rate means nearly all benefit.':'');
+      b+='<div class="dv">'+vd+'</div></td></tr>';
+    }
+  });
+  document.getElementById("tb").innerHTML=b;
+}
+function togRow(s){expanded=expanded===s?null:s;render()}
+render();
+</script>
+</body>
+</html>
